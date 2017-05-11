@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>演示</title>
+	<script type="text/javascript" src="dist/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="src/zqliang-jsUI.js"></script>
+</head>
+<body>
+	<div>
+		<input type="" name="productName" id="j_productName" zqliang_table="j_table"  />
+	</div>
+	<table id="j_table" class="zqliang_table"  zqliang-table-ajax="http://127.0.0.1/load-data" zqliang-table-ele="responseObject"
+		zqliang_table_query="j_productName">
+		<thead>
+			<tr>
+				<th zql_col_field="productName" zqliang_table_field_type="checkbox">产品名称</th>
+				<th zql_col_field="productName" zqliang_table_field_type="text">名称</th>
+				<th zql_col_field="code" 		zqliang_table_field_type="date" 	zqliang_date_format="yyyy-MM-dd">代码</th>
+				<th zql_col_field="name" 		zqliang_table_field_type="select" 	zqliang_dic_ajax="yyyy-MM-dd">随机</th>
+				<th zql_col_field="date" 		zqliang_table_field_type="text">日期</th>
+			</tr>
+		</thead>
+	</table>
+</body>
+</html>
