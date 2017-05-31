@@ -1,0 +1,21 @@
+.zqliang_table {
+	line-height: 30px;
+	text-align: center;
+	width: 100%;
+}
+.zqliang-pageable {
+	float: right;
+	margin-right:20px;
+}
+.zqliang-pageable li{
+	float: left;
+	list-style-type: none;
+	line-height: 20px;
+	text-align: center;
+	cursor: pointer;
+	margin-left: 20px;
+	border: 1px solid #ccc;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 1px 5px;
+}
