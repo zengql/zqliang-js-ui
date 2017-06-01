@@ -15,29 +15,77 @@ $(function(){
 		this.id = "";
 
 		this.page = {
-			curentPage : 1,
-			pageSize : 15,
-			getPageParam : function() {
-				return "pageSize="+pageSize+"&curentPage="+curentPage;
+			curentPage : 1,//当前页
+			totalPage: 1,//总页数
+			totalSize: 0, //总页数
+			pageSize :  15,
+			pageNum : function(){//页码
+				//最多可以有五个页码加一个最后一个和第一个
+				var pageNum = new Array(7);
+				pageNum[3] = this.curentPage;//最中间一个是当前页
+
+				//计算前两页
+				if (this.curentPage-2>1) {
+					pageNum[2] = this.curentPage-1;
+					pageNum[1] = this.curentPage-2;
+					pageNum[0] = 1;
+				} else if (this.curentPage ==3) {
+					pageNum[2] = this.curentPage-1;
+					pageNum[1] = this.curentPage-2;
+				} else if (this.curentPage ==2) {
+					pageNum[2] = this.curentPage-1;
+				}
+
+				//计算后两页
+				if (this.curentPage+2<this.totalPage) {
+					pageNum[4] = this.curentPage+1;
+					pageNum[5] = this.curentPage+2;
+					pageNum[6] = this.totalPage;
+				} else if (this.curentPage+1==this.totalPage) {
+					pageNum[4] = this.curentPage+1;
+				} else if (this.curentPage+2==this.totalPage) {
+					pageNum[4] = this.curentPage+1;
+					pageNum[5] = this.curentPage+2;
+				}
+				return pageNum;
+			},
+			getPageParam : function(pageSize, curentPath) {
+				return "pageSize="+pageSize+"&curentPage="+curentPath;
 			},
 			genrator : function(data, tableEle, table) {//根据数据显示分页数据
 				var tfoot = $(tableEle).children("tfoot");
-				if (tfoot.length <1 || !tfoot.attr("zqliang-page-total")) {
+				if (tfoot.length <1 || !tfoot.attr("zqliang-page-totalPage")) {
 					return;
 				}
-				let total = tfoot.attr("zqliang-page-total");
+				let total = tfoot.attr("zqliang-page-totalPage");
 				let totalArray = total.split(".");
 				let dataArray = data;
 				for (var i = 0; i<totalArray.length; i++) {
 					dataArray =dataArray[totalArray[i]];
 				}
-
-				//如果在第一页不计算页数
-				if (dataArray && dataArray/this.pageSize<2) {
-					return;
+				this.totalPage = dataArray;
+				
+				var pageNum = this.pageNum();
+				var ul = "";
+				for (num in pageNum) {
+					if (4 == num) {
+						ul += "<li class='zqliang-page-num zqliang-page-active'>"+pageNum[num]+"</li>";
+					} else {
+						ul += "<li class='zqliang-page-num'>"+pageNum[num]+"</li>";
+					}
+					
 				}
 				var content = tfoot.children().children();
-				content.html("<div><ul class='zqliang-pageable'><li  onclick=\"zql.table.load('"+this.curentPage+"','"+table.id+"')\">上一页</li><li onclick=\"alert(zqliang)\">下一页</li></ul></div>")
+				content.html("<div><ul class='zqliang-pageable'>"+ul+"</ul></div>");
+
+				var _page = this;
+
+				//给分页组件添加事件
+				$(".zqliang-page-num").click(function(){
+					$(this).siblings().removeClass("zqliang-page-active");
+					$(this).addClass("zqliang-page-active");
+					table.parseTable(table, _page.getPageParam(_page.pageSize, $(this).text()));
+				});
 			}
 		};
 
@@ -45,7 +93,7 @@ $(function(){
 
 		};
 
-		this.parseTable = function(table) { //处理表格
+		this.parseTable = function(table, param) { //处理表格
 			var ajaxUrl = $(table).attr("zqliang-table-ajax");
 			if (!ajaxUrl) {//如果不存在就会添加
 				return;
@@ -58,7 +106,11 @@ $(function(){
 			var ths = $(table).children("thead").children().children();
 			tbody.append("<tr><td colspan='"+ths.length+"'>加载数据中...</td></tr>")
 			$(table).append(tbody);
-			ajaxData(ajaxUrl, "", this, table);
+
+			if (!param) {
+				param = "";
+			}
+			ajaxData(ajaxUrl, param, this, table);
 		};
 		this.succFun = function(data, thisObj) {//表格加载成功后执行的内容
 			let responseData = $(thisObj).attr("zqliang-table-ele");

@@ -13,9 +13,13 @@
 	line-height: 20px;
 	text-align: center;
 	cursor: pointer;
-	margin-left: 20px;
+	margin-left: 10px;
 	border: 1px solid #ccc;
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 1px 5px;
+}
+.zqliang-page-active {
+	background-color: rgb(31, 73, 125);
+	color: #fff;
 }
