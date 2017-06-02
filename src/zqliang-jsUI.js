@@ -12,7 +12,9 @@ $(function(){
 	* 表格对象
 	*/
 	function Table(){
-		this.id = "";
+		this.id = "";//表格标识
+
+		this.rowData = {};//行数据
 
 		this.page = {
 			curentPage : 1,//当前页
@@ -53,6 +55,8 @@ $(function(){
 				return "pageSize="+pageSize+"&curentPage="+curentPath;
 			},
 			genrator : function(data, tableEle, table) {//根据数据显示分页数据
+				//初始化行数据
+
 				var tfoot = $(tableEle).children("tfoot");
 				if (tfoot.length <1 || !tfoot.attr("zqliang-page-totalPage")) {
 					return;
@@ -82,6 +86,10 @@ $(function(){
 
 				//给分页组件添加事件
 				$(".zqliang-page-num").click(function(){
+					//如果是当前页不做处理
+					if ($(this).hasClass("zqliang-page-active")) {
+						return;
+					}
 					$(this).siblings().removeClass("zqliang-page-active");
 					$(this).addClass("zqliang-page-active");
 					table.parseTable(table, _page.getPageParam(_page.pageSize, $(this).text()));
@@ -113,6 +121,8 @@ $(function(){
 			ajaxData(ajaxUrl, param, this, table);
 		};
 		this.succFun = function(data, thisObj) {//表格加载成功后执行的内容
+			_tableObj = this;
+
 			let responseData = $(thisObj).attr("zqliang-table-ele");
 			let responseDataArray = responseData.split(".");
 			let dataArray = data;
@@ -120,7 +130,7 @@ $(function(){
 				dataArray =dataArray[responseDataArray[i]];
 			}
 			if (!dataArray) {
-				Table.errorFun(thisObj, "没有接收到响应数据！");
+				_tableObj.errorFun(thisObj, "没有接收到响应数据！");
 				return;
 			}
 			responseData = dataArray;
@@ -130,25 +140,46 @@ $(function(){
 				tbody = $("<tbody></tbody>")
 			}
 			tbody.children().remove();
+			_tableObj.rowData = {};
+
+			//判断是否含有复选框,则给复选框添加事件
+			var checkboxAll = $(thisObj).find(".zqliang_table_checkboxAll");
+			if (checkboxAll.length > 0) {
+				checkboxAll = checkboxAll.children();
+				checkboxAll.click(function(){
+					if ($(this).prop('checked') ) {
+						$(".zqliang-table-checkbox").attr("checked", true);
+					} else {
+						$(".zqliang-table-checkbox").attr("checked", false);
+					}
+				});
+			}
 
 			//根据列设置数据
 			var ths = $(thisObj).children("thead").children().children();
 			if (ths.length <1) {
 				return;
 			}
+
 			$.each(responseData, function(i, item){
-				var tr = "<tr>";
+				var tr = "<tr rownum='"+i+"'>";
+				_tableObj.rowData["row"+i]=item;
 				$.each(ths, function(i, v){
 					var fieldName = $(v).attr("zql_col_field");
-					if (fieldName.length) {
+					if (fieldName) {
 						tr += "<td>"+ item[fieldName]+"</td>"
 					} else {
-						tr += "<td></td>"
+						if (checkboxAll.length > 0) {
+							tr += "<td><input type='checkbox' class='zqliang-table-checkbox'> </td>"
+						} else {
+							tr += "<td></td>"	
+						}
 					}
 				});
 				tr += "</tr>"
 				tbody.append(tr);
 			});
+			
 			//生成分页
 			this.page.genrator(data, thisObj, this);
 		};
@@ -171,7 +202,73 @@ $(function(){
 		};
 
 	}
+
+	/**
+	* 下拉菜单
+	*/
+	function Select(){
+
+	}
 	
+
+	/**
+	* 按钮对象
+	*/
+	var btn =  {
+		init : function() {
+			$(".zqliang-btn").click(function(){
+				var type = $(this).attr("zqliang-btn-type");
+				if (!type) {
+					return;
+				}
+				if("href"== type && $(this).attr("zqliang-btn-href")){
+					location.href=$(this).attr("zqliang-btn-href");
+					return;
+				} else if("edit" == type) {
+					btn.edit($(this));
+				}
+			});
+		},
+		edit : function(thisEle){
+
+			var table = thisEle.attr("zqliang-for");
+			if(!table || $("#"+table).length<1) {
+				return;
+			}
+			var checkeds = $("#"+table).find(".zqliang-table-checkbox:checked");
+			if (checkeds.length <1 || checkeds.length>1) {
+				alert("只能选择一项！");
+				return;
+			}
+			var rowNum = checkeds.parents("tr").attr("rownum");
+			if (!rowNum) {//行号必须存在，数据根据行号获取
+				return;
+			}
+			var href = thisEle.attr("zqliang-btn-href");
+			if (!href) {
+				return;
+			}
+			//从行数据中拿到响应的参数
+			var rowData = zqliang[table].rowData["row"+rowNum];
+			var strArray = href.split("#");
+			href = "";
+			for (item in strArray) {
+				var itemStr = strArray[item];
+				var end = itemStr.indexOf("}")
+				if (end<0){
+					href+=itemStr;
+				} else {
+					var key = itemStr.substring(1, end);
+					key = rowData[key];
+					if (!key) {
+						key = "";
+					}
+					href += key+itemStr.substring(end+1);
+				}
+			}
+			location.href=href;
+		}
+	}
 	
 	var seq = 0;
 	/**
@@ -179,7 +276,8 @@ $(function(){
 	*/
 	let zqliang = {
 		init	:	function(){//总览的厨师换
-			zqliang.table.init();//表格的初始化动作
+			this.table.init();//表格的初始化动作
+			this.button.init();//表格的初始化动作
 		},
 		table   :   {
 			init : function(){//初始化函数
@@ -215,6 +313,14 @@ $(function(){
 					return;
 				}
 				table.load();
+			}
+		},
+		button : {
+			init : function(){
+				if($(".zqliang-btn").length < 1) {
+					return;
+				}
+				btn.init();
 			}
 		}
 	}
