@@ -1,9 +1,11 @@
 这个框架就是以HTML为主， 增加一些固定的DOM节点属性，这个辅助脚本会自动做一些固定的动作，
-具体效果请参考index.html
+具体效果请参考index.html  
 
 现在的页面一些常用的功能模块会重复的写js代码，也有很多同学会把js放到不应放的位置，
-这个只是一个网页开发的辅助js脚本，不能算框架，依赖jquery 和bootstrap的css文件。
-jquery:只要用到元素的查询和事件的绑定
+这个只是一个网页开发的辅助js脚本，不能算框架，依赖jquery 和bootstrap的css文件。  
+
+jquery:只要用到元素的查询和事件的绑定  
+
 bootstrap：不是美工出身，一些样式要用到，只需要min.css，其他不需要
 
 我只是想要一个简单的网页展示
@@ -11,7 +13,8 @@ bootstrap：不是美工出身，一些样式要用到，只需要min.css，其�
 
 比如
 表格：
-<div class="container text-right">
+div class="container text-right"  >
+
 		<!-- 跳转按钮属性
 			zqliang-btn-href 跳转链接
 			zqliang-btn-type 按钮类型，先只有两个，href:跳转，edit:修改
