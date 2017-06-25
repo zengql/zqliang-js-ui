@@ -275,7 +275,15 @@ $(function(){
 	* main 对象
 	*/
 	let zqliang = {
-		init	:	function(){//总览的厨师换
+		init	:	function(){//总览的初始化
+			//加载css
+			$.each($("script"), function(i,v){
+				if ($(v).attr("src").indexOf("zqliang")>-1) {
+					var paths = $(v).attr("src").substring(0, $(v).attr("src").lastIndexOf("/"));
+					loadCss(paths+"/zqliang-jsUI.css");
+				}
+			});
+
 			this.table.init();//表格的初始化动作
 			this.button.init();//表格的初始化动作
 		},
@@ -330,6 +338,18 @@ $(function(){
 	
 
 	zql =  zqliang;
+
+
+	/**
+	* 动态加载js
+	*/
+	function loadCss(url){
+		var link = document.createElement( "link" );
+		link.type = "text/css";
+		link.rel = "stylesheet";
+		link.href = url;
+		document.getElementsByTagName( "head" )[0].appendChild( link );
+	}; 
 	
 	
 	/**
